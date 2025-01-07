@@ -16,15 +16,12 @@ jobs:
         uses: actions/checkout@v3
 
       # Step 2: Determine new version using SemVer
-      - name: Determine SemVer
+      - name: Determine SemVer version
         id: semver
-        uses: actions/semver-release@v1
+        uses: mikeal/semver-release-action@v1
         with:
-          # Default to increment the patch version
+          # Set the default increment to patch
           increment: patch
-          major-label: major
-          minor-label: minor
-          patch-label: patch
 
       # Step 3: Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -40,12 +37,12 @@ jobs:
           push: true
           tags: |
             joshuafullerdocker/adsbxcot-deploy:latest
-            joshuafullerdocker/adsbxcot-deploy:${{ steps.semver.outputs.new_version }}
+            joshuafullerdocker/adsbxcot-deploy:${{ steps.semver.outputs.version }}
 
       # Step 5: Commit new version to repository
       - name: Push new version tag
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git tag -a ${{ steps.semver.outputs.new_version }} -m "Release version ${{ steps.semver.outputs.new_version }}"
-          git push origin ${{ steps.semver.outputs.new_version }}
+          git tag -a ${{ steps.semver.outputs.version }} -m "Release version ${{ steps.semver.outputs.version }}"
+          git push origin ${{ steps.semver.outputs.version }}
