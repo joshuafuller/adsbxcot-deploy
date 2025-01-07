@@ -22,6 +22,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
+          noVersionBumpBehavior: patch
+
+      # Debug Step 1: Check if DOCKER_USERNAME is set
+      - name: Debug Docker Username
+        run: echo "Docker Username: ${{ secrets.DOCKER_USERNAME }}"
+      
+      # Debug Step 2: Check if DOCKER_PASSWORD is set (masked in logs)
+      - name: Debug Docker Password
+        run: echo "Docker Password: ${{ secrets.DOCKER_PASSWORD }}" # This will be masked in logs
 
       # Step 3: Log in to Docker Hub
       - name: Log in to Docker Hub
