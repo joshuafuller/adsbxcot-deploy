@@ -1,0 +1,4 @@
+.git
+*.yaml
+*.md
+*.log

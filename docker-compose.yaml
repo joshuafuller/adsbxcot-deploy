@@ -1,0 +1,20 @@
+---
+version: '3.8'
+services:
+  hawaii:
+    image: joshuafullerdocker/adsbxcot-deploy
+    container_name: adsbxcot-hawaii
+    environment:
+      COT_URL: "tcp://10.10.10.233:8088"
+      ADSBX_URL: "https://api.airplanes.live/v2/point/19.8968/-155.5828/250"
+      POLL_INTERVAL: 10
+      DEBUG: 1
+
+  washington_dc:
+    image: joshuafullerdocker/adsbxcot-deploy
+    container_name: adsbxcot-washington-dc
+    environment:
+      COT_URL: "tcp://10.10.10.233:8088"
+      ADSBX_URL: "https://api.airplanes.live/v2/point/38.9072/-77.0369/50"
+      POLL_INTERVAL: 10
+      DEBUG: 0

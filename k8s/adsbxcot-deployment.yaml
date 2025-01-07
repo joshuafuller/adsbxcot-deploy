@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adsbxcot-hawaii
+  labels:
+    app: adsbxcot-hawaii
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adsbxcot-hawaii
+  template:
+    metadata:
+      labels:
+        app: adsbxcot-hawaii
+    spec:
+      containers:
+        - name: adsbxcot
+          image: joshuafullerdocker/adsbxcot-deploy:latest
+          imagePullPolicy: Always
+          env:
+            - name: COT_URL
+              value: "tcp://10.10.10.233:8088"
+            - name: ADSBX_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: adsbxcot-config
+                  key: ADSBX_URL_HAWAII
+            - name: POLL_INTERVAL
+              value: "10"
+            - name: DEBUG
+              value: "1"
