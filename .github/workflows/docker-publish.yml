@@ -1,61 +1,60 @@
-name: Docker Build and Push with SemVer
+# .github/workflows/publish-docker-image.yml
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Publish Docker image
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch: # Allow manual triggers
+  release:
+    types: [published]
 
 jobs:
-  build-and-push:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Check out the repo
         uses: actions/checkout@v4
 
-      # Step 2: Determine new version using SemVer
-      - name: Get Next Version
-        id: semver
-        uses: ietf-tools/semver-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-          noVersionBumpBehavior: patch
-
-      # Debug Step 1: Check if DOCKER_USERNAME is set
-      - name: Debug Docker Username
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: echo "Docker Username: $DOCKER_USERNAME"
-
-      # Debug Step 2: Check if DOCKER_PASSWORD is set (masked in logs)
-      - name: Debug Docker Password
-        env:
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "Docker Password: $DOCKER_PASSWORD" # Password will be masked
-
-      # Step 3: Log in to Docker Hub
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push Docker image
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          push: true
-          tags: |
-            joshuafullerdocker/adsbxcot-deploy:latest
-            joshuafullerdocker/adsbxcot-deploy:${{ steps.semver.outputs.nextStrict }}
+          images: my-docker-hub-namespace/my-docker-hub-repository
 
-      # Step 5: Commit new version to repository
-      - name: Push new version tag
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git tag -a ${{ steps.semver.outputs.next }} -m "Release version ${{ steps.semver.outputs.next }}"
-          git push origin ${{ steps.semver.outputs.next }}
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          # Example: subject-name and subject-digest must match the built image
+          subject-name: my-docker-hub-namespace/my-docker-hub-repository
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
