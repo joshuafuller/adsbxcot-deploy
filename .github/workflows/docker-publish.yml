@@ -1,60 +1,63 @@
-# .github/workflows/publish-docker-image.yml
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-#
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
-name: Publish Docker image
+name: Build & Release Docker Image (with SemVer)
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  build-and-push:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
 
     steps:
-      - name: Check out the repo
+      # 1. Check out code
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Determine next SemVer version based on existing tags
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          noVersionBumpBehavior: patch
+
+      # 3. Log in to Docker Hub (using your secrets)
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: my-docker-hub-namespace/my-docker-hub-repository
-
+      # 4. Build & push Docker image (two tags: latest & the semver number)
       - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            joshuafullerdocker/adsbxcot-deploy:latest
+            joshuafullerdocker/adsbxcot-deploy:${{ steps.semver.outputs.next }}
 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v2
+      # 5. Push a git tag to the repo, matching the new version
+      - name: Tag repo with next version
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a ${{ steps.semver.outputs.next }} -m "Release version ${{ steps.semver.outputs.next }}"
+          git push origin ${{ steps.semver.outputs.next }}
+
+      # 6. Create a GitHub Release for the new version
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
         with:
-          # Example: subject-name and subject-digest must match the built image
-          subject-name: my-docker-hub-namespace/my-docker-hub-repository
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          tag_name: ${{ steps.semver.outputs.next }}
+          release_name: "Release ${{ steps.semver.outputs.next }}"
+          body: "Automated release for version ${{ steps.semver.outputs.next }}."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
