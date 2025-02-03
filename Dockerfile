@@ -17,8 +17,8 @@ RUN git clone --depth 1 https://github.com/snstac/pytak.git /app/pytak && \
     git clone --depth 1 https://github.com/snstac/adsbxcot.git /app/adsbxcot
 
 # Update PyTAK constants for larger queue sizes
-RUN sed -i 's/DEFAULT_MAX_OUT_QUEUE = 100/DEFAULT_MAX_OUT_QUEUE = 5000/' /app/pytak/pytak/constants.py && \
-    sed -i 's/DEFAULT_MAX_IN_QUEUE = 500/DEFAULT_MAX_IN_QUEUE = 5000/' /app/pytak/pytak/constants.py
+RUN sed -i 's/DEFAULT_MAX_OUT_QUEUE = 100/DEFAULT_MAX_OUT_QUEUE = 5000/' /app/pytak/src/pytak/constants.py && \
+    sed -i 's/DEFAULT_MAX_IN_QUEUE = 500/DEFAULT_MAX_IN_QUEUE = 5000/' /app/pytak/src/pytak/constants.py
 
 # Install PyTAK and ADSBXCOT
 RUN pip install --no-cache-dir /app/pytak /app/adsbxcot
