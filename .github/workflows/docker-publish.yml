@@ -10,33 +10,31 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     
-    # IMPORTANT: Specify the environment name exactly as it appears in your repo settings
-    environment: "Production"  # <-- or "Staging", "Test", etc.
+    # If your secrets are environment-level, specify the exact environment name here
+    environment: "Production"  # <-- Replace with your environment name
 
     steps:
-      # 1. Check out code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Determine next SemVer version
       - name: Get Next Version
         id: semver
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
-          # if you’re enforcing conventional commits
+          # Enforce conventional commits
+          # NOTE: If your version of semver-action doesn't support these params,
+          # remove them or rename to what's in semver-action docs.
           conventionalCommits: true
           failOnNoBump: true
 
-      # 3. Log in to Docker Hub using environment secrets
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}  # environment secret
-          password: ${{ secrets.DOCKER_PASSWORD }}  # environment secret
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Build & push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -47,7 +45,6 @@ jobs:
             joshuafullerdocker/adsbxcot-deploy:latest
             joshuafullerdocker/adsbxcot-deploy:${{ steps.semver.outputs.next }}
 
-      # 5. Tag repo with next version
       - name: Tag repo with next version
         run: |
           git config user.name "GitHub Actions"
@@ -55,7 +52,6 @@ jobs:
           git tag -a ${{ steps.semver.outputs.next }} -m "Release version ${{ steps.semver.outputs.next }}"
           git push origin ${{ steps.semver.outputs.next }}
 
-      # 6. Create GitHub Release
       - name: Create GitHub Release
         uses: actions/create-release@v1
         with:
