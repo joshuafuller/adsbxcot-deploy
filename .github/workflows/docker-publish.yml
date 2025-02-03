@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+# Add this block for GITHUB_TOKEN to have write permission on contents (tags).
+permissions:
+  contents: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
