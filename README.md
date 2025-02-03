@@ -70,6 +70,18 @@ For detailed configurations and deployment options, refer to the [Configuration 
 
 ---
 
+## Acknowledgments
+
+This project would not have been possible without the original work of **Greg Albrecht (Ample Data)** and his contributions to the TAK community. Greg is the creator of [ADSBXCOT](https://github.com/snstac/adsbcot), which serves as the foundation for this wrapper. His work in public safety technology, including projects like **PyTAK**, **AISCoT**, **APRSCoT**, and many others, has significantly advanced TAK integration and real-time situational awareness tools.
+
+**ADSBXCOT Deploy** is merely a wrapper designed to streamline and simplify the deployment of Greg's original ADSBXCOT application. Full credit for the core functionality and TAK integration belongs to him.
+
+You can find more of Greg's work on GitHub: [github.com/ampledata](https://github.com/ampledata)
+
+Thank you, Greg, for your dedication to open-source and the TAK ecosystem! 🚀
+
+---
+
 ## Contributing
 
 We welcome contributions to improve this project! If you have ideas or fixes, feel free to open an issue or submit a pull request.
