@@ -10,7 +10,10 @@ WORKDIR /build
 # Create a virtual environment and install necessary Python packages
 RUN python -m venv /venv \
  && /venv/bin/pip install --upgrade pip setuptools wheel \
- && /venv/bin/pip install "pytak[with_crypto]==6.4.0" aircot adsbxcot
+ && /venv/bin/pip install \
+    "pytak[with_crypto]" \
+    aircot \
+    adsbxcot
 
 # Use the latest stable version of the Chainguard Python image for the final image
 FROM cgr.dev/chainguard/python:latest

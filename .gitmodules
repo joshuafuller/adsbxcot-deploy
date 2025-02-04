@@ -1,6 +1,0 @@
-[submodule "pytak"]
-	path = pytak
-	url = https://github.com/snstac/pytak.git
-[submodule "adsbxcot"]
-	path = adsbxcot
-	url = https://github.com/snstac/adsbxcot.git
