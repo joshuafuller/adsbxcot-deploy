@@ -21,6 +21,7 @@ ADSBXCOT Deploy provides a streamlined solution for deploying the ADSBXCOT appli
 - **Multi-Region Support**: Spin up multiple instances to cover different areas.
 - **Dynamic Configuration**: Use environment variables to adjust settings without modifying code.
 - **Extensibility**: Supports Docker Compose for multi-container setups and Kubernetes for large-scale deployments.
+- **Chainguard Base Images**: Now using Chainguard images for enhanced security and minimal footprint.
 
 ---
 
