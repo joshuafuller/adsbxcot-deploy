@@ -1,13 +1,16 @@
-# Use the latest development version of the Chainguard Python image as the builder
-FROM cgr.dev/chainguard/python:latest-dev AS builder
+# ──────────────────────────────────────────────────────────────────────────────
+# Stage 1: Builder
+# ──────────────────────────────────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
 
-# Switch to the root user
 USER root
-
-# Set the working directory for the build process
 WORKDIR /build
 
-# Create a virtual environment and install necessary Python packages
+# Install what's needed for a venv
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-venv \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN python -m venv /venv \
  && /venv/bin/pip install --upgrade pip setuptools wheel \
  && /venv/bin/pip install \
@@ -15,17 +18,27 @@ RUN python -m venv /venv \
     aircot \
     adsbxcot
 
-# Use the latest stable version of the Chainguard Python image for the final image
-FROM cgr.dev/chainguard/python:latest
+# ──────────────────────────────────────────────────────────────────────────────
+# Stage 2: Final
+# ──────────────────────────────────────────────────────────────────────────────
+FROM python:3.12-slim
 
-# Set the working directory for the application
+# Create non-root user
+RUN adduser --system --group --uid 1001 adsbuser
+
+# Create /app, set it as the working directory
 WORKDIR /app
 
-# Copy the virtual environment from the builder stage
+# Copy the built venv from the builder
 COPY --from=builder /venv /venv
 
-# Copy the application script into the image
+# Copy your wrapper script
 COPY adsbxcot-wrapper.py /app/adsbxcot-wrapper.py
 
-# Set the entry point to run the application script using the Python interpreter from the virtual environment
+# Make sure adsbuser owns /app, so it can write config.ini
+RUN chown -R adsbuser:adsbuser /app
+
+# Switch to non-root user
+USER adsbuser:adsbuser
+
 ENTRYPOINT ["/venv/bin/python", "/app/adsbxcot-wrapper.py"]
