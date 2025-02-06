@@ -2,7 +2,7 @@
 
 # Default values
 COT_URL=${COT_URL:-"tcp://192.168.100.100:8088"}
-ADSBX_URL=${ADSBX_URL:-"https://api.airplanes.live/v2/mil"}
+FEED_URL=${FEED_URL:-"https://api.airplanes.live/v2/mil"}
 POLL_INTERVAL=${POLL_INTERVAL:-10}
 API_KEY=${API_KEY:-"none"}
 DEBUG=${DEBUG:-0}
@@ -14,7 +14,7 @@ cat <<EOF > /app/config.ini
 TAK_PROTO = 0
 COT_URL = $COT_URL
 POLL_INTERVAL = $POLL_INTERVAL
-ADSBX_URL = $ADSBX_URL
+FEED_URL = $FEED_URL
 API_KEY = $API_KEY
 DEBUG = $DEBUG
 COT_STALE = $COT_STALE

@@ -32,14 +32,14 @@ Example for Hawaii:
 ```bash
 docker run --rm -it \
   -e COT_URL="tcp://10.10.10.233:8088" \
-  -e ADSBX_URL="https://api.airplanes.live/v2/point/19.8968/-155.5828/250" \
+  -e FEED_URL="https://api.airplanes.live/v2/point/19.8968/-155.5828/250" \
   -e POLL_INTERVAL=10 \
   -e DEBUG=1 \
   adsbxcot-deploy
 ```
 
 - `COT_URL`: TAK server URL for CoT data.
-- `ADSBX_URL`: Airplanes.live endpoint for the coverage area.
+- `FEED_URL`: Airplanes.live endpoint for the coverage area.
 - `POLL_INTERVAL`: Frequency (in seconds) to poll the API.
 - `DEBUG`: Set to `1` for verbose logs.
 
@@ -53,17 +53,16 @@ Docker Compose allows you to define multiple ADSBXCOT services for different reg
 
 #### **Compose Configuration**
 
-Here’s an example `docker-compose.yaml` file for Hawaii and Washington, DC:
+Here's an example `docker-compose.yaml` file for Hawaii and Washington, DC:
 
 ```yaml
-
 services:
   hawaii:
     image: joshuafullerdocker/adsbxcot-deploy
     container_name: adsbxcot-hawaii
     environment:
       COT_URL: "tcp://10.10.10.100:8088"
-      ADSBX_URL: "https://api.airplanes.live/v2/point/19.8968/-155.5828/250"
+      FEED_URL: "https://api.airplanes.live/v2/point/19.8968/-155.5828/250"
       POLL_INTERVAL: 10
       DEBUG: 1
 
@@ -72,7 +71,7 @@ services:
     container_name: adsbxcot-washington-dc
     environment:
       COT_URL: "tcp://10.10.10.100:8088"
-      ADSBX_URL: "https://api.airplanes.live/v2/point/38.9072/-77.0369/50"
+      FEED_URL: "https://api.airplanes.live/v2/point/38.9072/-77.0369/50"
       POLL_INTERVAL: 10
       DEBUG: 0
 ```
@@ -95,7 +94,7 @@ docker-compose down
 
 ### **3. Kubernetes (k3s)**
 
-Kubernetes offers a highly scalable and robust way to deploy ADSBXCOT for large-scale or multi-region setups. This guide assumes you’re using k3s, a lightweight Kubernetes distribution.
+Kubernetes offers a highly scalable and robust way to deploy ADSBXCOT for large-scale or multi-region setups. This guide assumes you're using k3s, a lightweight Kubernetes distribution.
 
 #### **Configuration Files**
 
@@ -109,8 +108,8 @@ metadata:
   name: adsbxcot-config
   namespace: default
 data:
-  ADSBX_URL_HAWAII: "https://api.airplanes.live/v2/point/19.8968/-155.5828/250"
-  ADSBX_URL_WASHINGTON_DC: "https://api.airplanes.live/v2/point/38.9072/-77.0369/50"
+  FEED_URL_HAWAII: "https://api.airplanes.live/v2/point/19.8968/-155.5828/250"
+  FEED_URL_WASHINGTON_DC: "https://api.airplanes.live/v2/point/38.9072/-77.0369/50"
 ```
 
 2. **Deployment for Hawaii**
@@ -139,11 +138,11 @@ spec:
           env:
             - name: COT_URL
               value: "tcp://10.10.10.233:8088"
-            - name: ADSBX_URL
+            - name: FEED_URL
               valueFrom:
                 configMapKeyRef:
                   name: adsbxcot-config
-                  key: ADSBX_URL_HAWAII
+                  key: FEED_URL_HAWAII
             - name: POLL_INTERVAL
               value: "10"
             - name: DEBUG
@@ -211,7 +210,7 @@ Examples:
 
 3. **Rate Limiting**:
 
-   - Respect the API’s rate limit (e.g., 1 request per second).
+   - Respect the API's rate limit (e.g., 1 request per second).
 
 ---
 

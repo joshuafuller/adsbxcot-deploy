@@ -5,7 +5,7 @@ metadata:
   name: adsbxcot-config
   namespace: default
 data:
-  ADSBX_URL_HAWAII: >
+  FEED_URL_HAWAII: >
     https://api.airplanes.live/v2/point/19.8968/-155.5828/250
-  ADSBX_URL_WASHINGTON_DC: >
+  FEED_URL_WASHINGTON_DC: >
     https://api.airplanes.live/v2/point/38.9072/-77.0369/50

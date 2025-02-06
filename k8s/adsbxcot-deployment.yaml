@@ -22,11 +22,11 @@ spec:
           env:
             - name: COT_URL
               value: "tcp://10.10.10.233:8088"
-            - name: ADSBX_URL
+            - name: FEED_URL
               valueFrom:
                 configMapKeyRef:
                   name: adsbxcot-config
-                  key: ADSBX_URL_HAWAII
+                  key: FEED_URL_HAWAII
             - name: POLL_INTERVAL
               value: "10"
             - name: DEBUG

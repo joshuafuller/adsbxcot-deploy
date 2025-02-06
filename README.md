@@ -52,7 +52,7 @@ For Hawaii:
 ```bash
 docker run --rm -it \
   -e COT_URL="tcp://10.10.10.233:8088" \
-  -e ADSBX_URL="https://api.airplanes.live/v2/point/19.8968/-155.5828/250" \
+  -e FEED_URL="https://api.airplanes.live/v2/point/19.8968/-155.5828/250" \
   -e POLL_INTERVAL=10 \
   -e DEBUG=1 \
   adsbxcot-deploy
