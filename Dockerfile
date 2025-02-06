@@ -1,44 +1,32 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# Stage 1: Builder
-# ──────────────────────────────────────────────────────────────────────────────
-FROM python:3.12-slim AS builder
+# Use a minimal Python image
+FROM python:3.10-slim
 
-USER root
-WORKDIR /build
-
-# Install what's needed for a venv
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3-venv \
- && rm -rf /var/lib/apt/lists/*
-
-RUN python -m venv /venv \
- && /venv/bin/pip install --upgrade pip setuptools wheel \
- && /venv/bin/pip install \
-    "pytak[with_crypto]" \
-    aircot \
-    adsbxcot
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Stage 2: Final
-# ──────────────────────────────────────────────────────────────────────────────
-FROM python:3.12-slim
-
-# Create non-root user
-RUN adduser --system --group --uid 1001 adsbuser
-
-# Create /app, set it as the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy the built venv from the builder
-COPY --from=builder /venv /venv
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    git \
+    libffi-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy your wrapper script
-COPY adsbxcot-wrapper.py /app/adsbxcot-wrapper.py
+# Clone PyTAK and ADSBXCOT repositories
+RUN git clone --depth 1 https://github.com/snstac/pytak.git /app/pytak && \
+    git clone --depth 1 https://github.com/snstac/adsbxcot.git /app/adsbxcot
 
-# Make sure adsbuser owns /app, so it can write config.ini
-RUN chown -R adsbuser:adsbuser /app
+# Update PyTAK constants for larger queue sizes
+# Note: The constants file is now in /app/pytak/src/pytak/constants.py
+RUN sed -i 's/DEFAULT_MAX_OUT_QUEUE = 100/DEFAULT_MAX_OUT_QUEUE = 5000/' /app/pytak/src/pytak/constants.py && \
+    sed -i 's/DEFAULT_MAX_IN_QUEUE = 500/DEFAULT_MAX_IN_QUEUE = 5000/' /app/pytak/src/pytak/constants.py
 
-# Switch to non-root user
-USER adsbuser:adsbuser
+# Install PyTAK and ADSBXCOT
+RUN pip install --no-cache-dir /app/pytak /app/adsbxcot
 
-ENTRYPOINT ["/venv/bin/python", "/app/adsbxcot-wrapper.py"]
+# Copy the wrapper script for dynamic configuration
+COPY adsbxcot-wrapper.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/adsbxcot-wrapper.sh
+
+# Set the entry point to the wrapper script
+ENTRYPOINT ["adsbxcot-wrapper.sh"]
